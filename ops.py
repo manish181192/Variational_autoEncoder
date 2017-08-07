@@ -25,3 +25,6 @@ def linear(ip, ip_size, out_size, scope):
     W = tf.get_variable('W', initializer= tf.truncated_normal(shape=[ip_size, out_size]))
     B = tf.get_variable('B', shape=[out_size], initializer=tf.constant_initializer(value=0.1))
 
+    z = tf.matmul(ip,W)+B
+
+    return z
