@@ -42,20 +42,20 @@ class vae(object):
             gen_h1 = lrelu(deconv(img1, [self.batch_size, 14,14,16], scope = 'gen_h1'))
             gen_h2 = tf.nn.sigmoid(deconv(gen_h1, [self.batch_size, 28, 28, 1], scope='gen_h2'))
 
-        gen_image = gen_h2
+        gen_image = gen_h2[:,:,:,0]
         return gen_image
 
     def compute_loss(self):
         flat_ip_img = tf.reshape(self.ip_image, [-1, 28*28])
         flat_gen_image = tf.reshape(self.gen_image, [-1, 28*28])
         # mean square of generated image and original image
-        # self.generation_loss = tf.reduce_mean(tf.square(self.gen_image - self.ip_image))
-        self.generation_loss = -tf.reduce_sum(flat_ip_img * tf.log(1e-8 + flat_gen_image)
-                                              + (1-flat_ip_img) * tf.log(1e-8 + 1 - flat_gen_image),1)
+        self.generation_loss = tf.reduce_mean(tf.square(self.gen_image - self.ip_image))
+        # self.generation_loss = -tf.reduce_sum(flat_ip_img * tf.log(1e-8 + flat_gen_image)
+        #                                       + (1-flat_ip_img) * tf.log(1e-8 + 1 - flat_gen_image),1)
 
         #KL-Divergence between latent variable and unit gaussian
         self.latent_loss = 0.5 * tf.reduce_sum(tf.square(self.mean) + tf.square(self.std_dev) - tf.log(tf.square(self.std_dev)) - 1, 1)
 
-        total_loss = tf.reduce_mean(self.generation_loss+self.latent_loss)
+        total_loss = self.generation_loss+tf.reduce_mean(self.latent_loss)
 
         return total_loss
