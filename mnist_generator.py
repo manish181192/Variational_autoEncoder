@@ -17,13 +17,17 @@ def display(image):
         w.write(h, data_i)
 
 mnist = input_data.read_data_sets('MNIST_data')
-display(mnist.train.images[0,:])
+# display(mnist.train.images[0,:])
 vae = vae()
 
 opt = tf.train.AdamOptimizer(learning_rate=0.01).minimize(vae.loss)
 
 with tf.Session() as sess:
+    sess.run(tf.global_variables_initializer())
     for _ in range(1000):
-      batch = mnist.train.next_batch(100)
+        batch = mnist.train.next_batch(100)
+        _, loss, gen_images = sess.run([opt, vae.loss, vae.gen_image],feed_dict={vae.ip_image_x: batch[0]})
 
-      _, loss = sess.run([opt, vae.loss],feed_dict={vae.x: batch[0]})
+f = open('gen_images','wb')
+f.write(gen_images)
+f.close()

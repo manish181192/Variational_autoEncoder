@@ -18,6 +18,8 @@ def conv_with_lrelu(ip, ip_channel, out_channel, scope):
                             padding = 'SAME') + B
 
         conv_lrelu = lrelu(conv)
+        # tf.get_variable_scope().reuse_variables()
+
     return conv_lrelu
 
 def deconv(ip, target_shape, scope):
@@ -29,15 +31,17 @@ def deconv(ip, target_shape, scope):
                                                 output_shape=target_shape,
                                                 strides=[1,2,2,1])
         biases = tf.get_variable('biases', [target_shape[-1]], initializer=tf.constant_initializer(0.0))
-        deconv = tf.reshape(tf.nn.bias_add(conv_transpose, biases), conv_transpose.get_shape())
+        deconv = tf.reshape(tf.nn.bias_add(conv_transpose, biases), tf.shape(conv_transpose))
+        # tf.get_variable_scope().reuse_variables()
 
-        return deconv
+    return deconv
 
 def linear(ip, ip_size, out_size, scope):
+    with tf.variable_scope(scope):
+        W = tf.get_variable('W', shape=[ip_size, out_size],initializer= tf.truncated_normal_initializer(stddev=0.01))
+        B = tf.get_variable('B', shape=[out_size], initializer=tf.constant_initializer(value=0.1))
 
-    W = tf.get_variable('W', initializer= tf.truncated_normal(shape=[ip_size, out_size]))
-    B = tf.get_variable('B', shape=[out_size], initializer=tf.constant_initializer(value=0.1))
-
-    z = tf.matmul(ip,W)+B
+        z = tf.matmul(ip,W)+B
+        # tf.get_variable_scope().reuse_variables()
 
     return z
