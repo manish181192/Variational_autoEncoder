@@ -20,6 +20,19 @@ def conv_with_lrelu(ip, ip_channel, out_channel, scope):
         conv_lrelu = lrelu(conv)
     return conv_lrelu
 
+def deconv(ip, target_shape, scope):
+    with tf.variable_scope(scope):
+        W = tf.get_variable('w', [5, 5, target_shape[-1], ip.get_shape()[-1]],
+                            initializer=tf.random_normal_initializer(stddev=0.01))
+        conv_transpose = tf.nn.conv2d_transpose(value=ip,
+                                                filter=W,
+                                                output_shape=target_shape,
+                                                strides=[1,2,2,1])
+        biases = tf.get_variable('biases', [target_shape[-1]], initializer=tf.constant_initializer(0.0))
+        deconv = tf.reshape(tf.nn.bias_add(conv_transpose, biases), conv_transpose.get_shape())
+
+        return deconv
+
 def linear(ip, ip_size, out_size, scope):
 
     W = tf.get_variable('W', initializer= tf.truncated_normal(shape=[ip_size, out_size]))
