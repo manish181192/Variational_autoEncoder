@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 from vae import vae
 import png
+import numpy as np
 
 def display(image):
     rows = 28
@@ -24,10 +25,14 @@ opt = tf.train.AdamOptimizer(learning_rate=0.01).minimize(vae.loss)
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
-    for _ in range(1000):
+    for i in range(1000):
         batch = mnist.train.next_batch(100)
         _, loss, gen_images = sess.run([opt, vae.loss, vae.gen_image],feed_dict={vae.ip_image_x: batch[0]})
+        print 'epoch'+str(i)+' : '+str(loss)
 
 f = open('gen_images','wb')
-f.write(gen_images)
+
+for image in gen_images:
+    flat_image = np.reshape(image, [-1])
+    f.write(str(flat_image)+'\n')
 f.close()
