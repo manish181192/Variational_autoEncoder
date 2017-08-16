@@ -1,4 +1,29 @@
 import tensorflow as tf
+import png
+import numpy as np
+
+def merge(images, size):
+    h, w = 28, 28
+    img = np.zeros((h * size[0], w * size[1]))
+
+    for idx, image in enumerate(images):
+        i = idx % size[1]
+        j = idx / size[1]
+        img[j*h:j*h+h, i*w:i*w+w] = image
+    return img
+
+def display(image):
+    rows = 28
+    cols = 28
+    output_filename = 'temp.png'
+    print("writing " + output_filename)
+    with open(output_filename, "wb") as h:
+        w = png.Writer(cols, rows, greyscale=True)
+        data_i = [
+            image[(rows * cols + j * cols): (rows * cols + (j + 1) * cols)]
+            for j in range(rows)
+            ]
+        w.write(h, data_i)
 
 def lrelu(x, leak=0.2):
     f1 = 0.5 * (1 + leak)
